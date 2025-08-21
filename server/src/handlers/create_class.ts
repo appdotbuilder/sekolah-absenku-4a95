@@ -1,14 +1,28 @@
+import { db } from '../db';
+import { classesTable } from '../db/schema';
 import { type CreateClassInput, type Class } from '../schema';
 
-export async function createClass(input: CreateClassInput): Promise<Class> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is to create a new class
-    // Should persist class data to database and return the created class
-    return Promise.resolve({
-        id: 0,
+export const createClass = async (input: CreateClassInput): Promise<Class> => {
+  try {
+    // Insert class record
+    const result = await db.insert(classesTable)
+      .values({
         name: input.name,
-        description: input.description,
-        created_at: new Date(),
-        updated_at: new Date()
-    } as Class);
-}
+        description: input.description
+      })
+      .returning()
+      .execute();
+
+    // Return the created class
+    const classRecord = result[0];
+    return {
+      ...classRecord,
+      // Ensure dates are properly converted to Date objects
+      created_at: new Date(classRecord.created_at),
+      updated_at: new Date(classRecord.updated_at)
+    };
+  } catch (error) {
+    console.error('Class creation failed:', error);
+    throw error;
+  }
+};

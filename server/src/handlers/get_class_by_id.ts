@@ -1,8 +1,22 @@
+import { db } from '../db';
+import { classesTable } from '../db/schema';
+import { eq } from 'drizzle-orm';
 import { type Class } from '../schema';
 
-export async function getClassById(classId: number): Promise<Class | null> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is to fetch a specific class by its ID
-    // Should return class details or null if not found
-    return Promise.resolve(null);
-}
+export const getClassById = async (classId: number): Promise<Class | null> => {
+  try {
+    const results = await db.select()
+      .from(classesTable)
+      .where(eq(classesTable.id, classId))
+      .execute();
+
+    if (results.length === 0) {
+      return null;
+    }
+
+    return results[0];
+  } catch (error) {
+    console.error('Failed to get class by ID:', error);
+    throw error;
+  }
+};

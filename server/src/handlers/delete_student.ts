@@ -1,6 +1,19 @@
+import { db } from '../db';
+import { studentsTable } from '../db/schema';
+import { eq } from 'drizzle-orm';
+
 export async function deleteStudent(studentId: number): Promise<boolean> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is to delete a student record
-    // Should handle cascade deletion of related attendance records
-    return Promise.resolve(false);
+  try {
+    // Delete the student record - cascade deletion will handle related attendance records
+    const result = await db.delete(studentsTable)
+      .where(eq(studentsTable.id, studentId))
+      .returning()
+      .execute();
+
+    // Return true if a student was actually deleted
+    return result.length > 0;
+  } catch (error) {
+    console.error('Student deletion failed:', error);
+    throw error;
+  }
 }
